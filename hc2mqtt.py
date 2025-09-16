@@ -11,7 +11,6 @@ import click
 import click_config_file
 import paho.mqtt.client as mqtt
 
-from HADiscovery import publish_ha_discovery
 from HCDevice import HCDevice
 from HCSocket import HCSocket, now
 
@@ -238,6 +237,7 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
                                 topic_name = f"{mqtt_topic}/state/{state_topic_name}"
                                 body = {topic_name: value}
                                 # hcprint(f"!!! Publishing state to {mqtt_topic}:\n {body}")
+                                time.sleep(1)
                                 client.publish(
                                     mqtt_topic,
                                     json.dumps(body),
