@@ -222,7 +222,7 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
                                 name,
                                 f"publish to " + topic_name,
                             )
-                            hcprint(f"*** Publishing event to {mqtt_topic}:\n {str(value)}")
+                            # hcprint(f"*** Publishing event to {mqtt_topic}:\n {str(value)}")
                             client.publish(
                                 mqtt_topic,
                                 json.dumps({topic_name: value}),
@@ -237,7 +237,7 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
 
                                 topic_name = f"{mqtt_topic}/state/{state_topic_name}"
                                 body = {topic_name: value}
-                                hcprint(f"!!! Publishing state to {mqtt_topic}:\n {body}")
+                                # hcprint(f"!!! Publishing state to {mqtt_topic}:\n {body}")
                                 client.publish(
                                     mqtt_topic,
                                     json.dumps(body),
@@ -253,6 +253,7 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
 
     def on_open(ws):
         client.publish(f"{mqtt_topic}/LWT", "online", retain=True)
+        hcprint(device["name"], "websocket connected.")
 
     def on_close(ws, code, message):
         client.publish(f"{mqtt_topic}/LWT", "offline", retain=True)
