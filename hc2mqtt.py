@@ -22,22 +22,22 @@ def hcprint(*args):
 
 @click.command()
 @click.option("-d", "--devices_file", default="config/devices.json")
-@click.option("-h", "--mqtt_host", default="localhost")
-@click.option("-p", "--mqtt_prefix", default="homeconnect/")
+@click.option("-h", "--mqtt_host", envvar="MQTT_HOST")
+@click.option("-p", "--mqtt_prefix", default="homeconnect/", envvar="MQTT_PREFIX")
 @click.option("--mqtt_port", default=1883, type=int)
-@click.option("--mqtt_username")
-@click.option("--mqtt_password")
+@click.option("--mqtt_username", envvar="MQTT_USERNAME")
+@click.option("--mqtt_password", envvar="MQTT_PASSWORD")
 @click.option("--mqtt_ssl", is_flag=True)
-@click.option("--mqtt_cafile")
-@click.option("--mqtt_certfile")
-@click.option("--mqtt_keyfile")
+@click.option("--mqtt_cafile", default=None)
+@click.option("--mqtt_certfile", default=None)
+@click.option("--mqtt_keyfile", default=None)
 @click.option("--mqtt_clientname", default="hcpy1")
 @click.option("--domain_suffix", default="")
 @click.option("--debug/--no-debug", default=False)
-@click.option("--ha-discovery", is_flag=True)
+@click.option("--ha-discovery", is_flag=False)
 @click.option("--discovery_file", default="config/discovery.yaml")
 @click.option("--events_as_sensors", is_flag=True)
-@click_config_file.configuration_option()
+# @click_config_file.configuration_option()
 def hc2mqtt(
     devices_file: str,
     mqtt_host: str,
@@ -56,7 +56,6 @@ def hc2mqtt(
     discovery_file: str,
     events_as_sensors: bool,
 ):
-
     def on_connect(client, userdata, flags, rc):
         if rc == 5:
             hcprint(f"ERROR MQTT connection failed: unauthorized - {rc}")
@@ -65,7 +64,7 @@ def hc2mqtt(
             client.publish(f"{mqtt_prefix}LWT", payload="online", qos=0, retain=True)
             # Re-subscribe to all device topics on reconnection
             for device in devices:
-                mqtt_topic = f"{mqtt_prefix}{device['name']}"
+                # mqtt_topic = f"{mqtt_prefix}{device['name']}"
                 mqtt_set_topic = f"{mqtt_prefix}{device['name']}/set"
                 hcprint(device["name"], f"set topic: {mqtt_set_topic}")
                 client.subscribe(mqtt_set_topic)
@@ -89,11 +88,11 @@ def hc2mqtt(
                                 device["name"], f"program topic: {mqtt_selected_program_topic}"
                             )
                             client.subscribe(mqtt_selected_program_topic)
-                if ha_discovery:
-                    time.sleep(15)
-                    publish_ha_discovery(
-                        discovery_file, device, client, mqtt_topic, events_as_sensors
-                    )
+                # if ha_discovery:
+                    # time.sleep(15)
+                    # publish_ha_discovery(
+                    #     discovery_file, device, client, mqtt_topic, events_as_sensors
+                    # )
         else:
             hcprint(f"ERROR MQTT connection failed: {rc}")
 
@@ -218,13 +217,15 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
                     if client.is_connected():
                         for key, value in events.items():
                             event_topic_name = key.lower().replace(".", "_")
+                            topic_name = f"{mqtt_topic}/event/{event_topic_name}"
                             hcprint(
                                 name,
-                                f"publish to {mqtt_topic}/event/{event_topic_name}",
+                                f"publish to " + topic_name,
                             )
+                            hcprint(f"*** Publishing event to {mqtt_topic}:\n {str(value)}")
                             client.publish(
-                                f"{mqtt_topic}/event/{event_topic_name}",
-                                json.dumps(value),
+                                mqtt_topic,
+                                json.dumps({topic_name: value}),
                                 retain=True,
                             )
                         if update:
@@ -234,9 +235,12 @@ def client_connect(client, device, mqtt_topic, domain_suffix, debug):
                                 if isinstance(value, dict):
                                     value = json.dumps(value)
 
+                                topic_name = f"{mqtt_topic}/state/{state_topic_name}"
+                                body = {topic_name: value}
+                                hcprint(f"!!! Publishing state to {mqtt_topic}:\n {body}")
                                 client.publish(
-                                    f"{mqtt_topic}/state/{state_topic_name}",
-                                    str(value),
+                                    mqtt_topic,
+                                    json.dumps(body),
                                     retain=True,
                                 )
                     else:
