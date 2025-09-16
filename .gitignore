@@ -10,3 +10,8 @@ __*
 *.json
 *.zip
 *.ini
+*.com
+*.iml
+
+.idea
+secrets.env

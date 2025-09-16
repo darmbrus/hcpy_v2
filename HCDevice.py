@@ -51,6 +51,8 @@ from datetime import datetime
 
 from Crypto.Random import get_random_bytes
 
+def hcprint(*args):
+    print(now(), *args, flush=True)
 
 def now():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -401,9 +403,9 @@ class HCDevice:
         # they send a response, not sure how to interpet it
         self.token = base64url_encode(get_random_bytes(32)).decode("UTF-8")
         self.token = re.sub(r"=", "", self.token)
-        self.get("/ci/authentication", version=2, data={"nonce": self.token})
+        # self.get("/ci/authentication", version=2, data={"nonce": self.token})
 
-        self.get("/ci/info")  # clothes washer
+        # self.get("/ci/info")  # clothes washer
         self.get("/iz/info")  # dish washer
 
         # Retrieves registered clients like phone/hcpy itself
@@ -566,6 +568,7 @@ class HCDevice:
             on_close(ws, code, message)
 
         def on_error(ws, message):
+            hcprint("Websocket error: " + message)
             self.print("Websocket error:", message)
 
         self.ws.run_forever(
