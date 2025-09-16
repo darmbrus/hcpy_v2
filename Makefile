@@ -5,4 +5,4 @@ prod:
 build:
 	docker compose --file ./docker-compose.yml build
 dev:
-	docker compose --file ./docker-compose.yml up -d
+	docker compose --file ./docker-compose.local.yml up -d

@@ -6,7 +6,7 @@ services:
     environment:
       MQTT_USERNAME: "darmbrus"
       MQTT_PASSWORD: "none"
-      MQTT_HOST: "192.168.2.112"
+      MQTT_HOST: "192.168.2.194"
       MQTT_PORT: "1883"
       MQTT_PREFIX: "homeconnect/"
     volumes:
