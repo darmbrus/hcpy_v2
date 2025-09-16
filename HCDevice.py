@@ -403,9 +403,9 @@ class HCDevice:
         # they send a response, not sure how to interpet it
         self.token = base64url_encode(get_random_bytes(32)).decode("UTF-8")
         self.token = re.sub(r"=", "", self.token)
-        self.get("/ci/authentication", version=2, data={"nonce": self.token})
+        # self.get("/ci/authentication", version=2, data={"nonce": self.token})
 
-        self.get("/ci/info")  # clothes washer
+        # self.get("/ci/info")  # clothes washer
         self.get("/iz/info")  # dish washer
 
         # Retrieves registered clients like phone/hcpy itself
