@@ -51,8 +51,8 @@ from datetime import datetime
 
 from Crypto.Random import get_random_bytes
 
-from hc2mqtt import hcprint
-
+def hcprint(*args):
+    print(now(), *args, flush=True)
 
 def now():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -568,7 +568,7 @@ class HCDevice:
             on_close(ws, code, message)
 
         def on_error(ws, message):
-            hcprint("Websocket error: " + messge)
+            hcprint("Websocket error: " + message)
             self.print("Websocket error:", message)
 
         self.ws.run_forever(
